@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -136,9 +137,9 @@ public class Frame extends Application {
                         result.setText("请选择至少一个指令");
                     }
                 }
-                Group root = new Group();
-                root.getChildren().add(result);
-                Scene scene = new Scene(root);
+                BorderPane pane = new BorderPane();
+                pane.setCenter(result);
+                Scene scene = new Scene(pane);
                 stage.setScene(scene);
                 stage.show();
             }

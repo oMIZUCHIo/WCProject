@@ -1,3 +1,4 @@
+import java.util.Scanner;
 
 public class Main {
 
@@ -8,13 +9,24 @@ public class Main {
 
         if(args == null || args.length == 0){
             System.out.println("\n请输入指令");
+            Scanner scanner = new Scanner(System.in);
+            args = scanner.nextLine().split("\\s+");
+        }
+
+        if(!args[0].equals("wc.exe")){
+            System.out.println("\n当前只可运行wc.exe");
             return ;
         }
 
         //最后一个路径为文件路径
-        parameter.setFilePath(args[args.length - 1]);
+        String lastParam = args[args.length - 1];
+        if(!lastParam.equals("-x")){
+            parameter.setFilePath(lastParam);
+        }else{
+            parameter.setFrame(true);
+        }
 
-        for (int i = 0; i < args.length - 1; i++) {
+        for (int i = 1; i < args.length - 1; i++) {
             switch (args[i]) {
                 case "-c": //计算 file.c 的字符数
                     parameter.setCountChar(true);
@@ -37,11 +49,11 @@ public class Main {
                 default:
                     System.out.println("\n指令出错");
             }
-            if(parameter.isFrame()){
-                Frame.main(args);
-            }else{
-                System.out.println(wcUtil.process(parameter));
-            }
+        }
+        if(parameter.isFrame()){
+            Frame.main(args);
+        }else{
+            System.out.println(wcUtil.process(parameter));
         }
     }
 }

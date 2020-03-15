@@ -24,6 +24,9 @@ class WCUtil {
         //查询文件相应信息
         searchFiles(parameter,countList);
 
+        if(countList.size() == 0)
+            return "\n未有符合条件的文件";
+
         StringBuilder stringBuffer = new StringBuilder();
 
         for(Count count : countList){
@@ -66,6 +69,7 @@ class WCUtil {
 
                 //获取基础信息
                 Count count = countingSimply(file.getPath());
+                count.setFileName(file.getName());
 
                 //当含有 -s 命令时额外添加 代码行数 等信息
                 if(parameter.isCountComplex()){
@@ -105,10 +109,11 @@ class WCUtil {
 
                         //当输入文件名不含通配符 或 含通配符且文件名匹配时才查询
                         if(parameter.getMatchName() == null ||
-                                (parameter.getMatchName() != null && compareName(file.getName(),parameter.getMatchName()))) {
+                                (parameter.getMatchName() != null && compareName(f.getName(),parameter.getMatchName()))) {
 
                             //获取基础信息
                             Count count = countingSimply(f.getPath());
+                            count.setFileName(f.getName());
 
                             //当含有 -s 命令时额外添加 代码行数 等信息
                             if(parameter.isCountComplex()){
@@ -145,12 +150,16 @@ class WCUtil {
                 //逐个获取字符
                 for (int i = 0; i < line.length(); i++) {
 
-                    ++ charNum;
                     char c = line.charAt(i);
 
+                    //跳过空格类字符
+                    if (c == ' ' || c == '\n' || c == '\t' || c == '\r') {
+                       continue;
+                    }
+                    ++ charNum;
+
                     //如果字符为  空格、换行等 则为一个单词的结束
-                    if (c == ' ' || c == '\n' || c == '\t' || c == '\r'
-                            ||c == ',' || c == '.' || c == '\"' || c == '\'') {
+                    if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z')) {
 
                         flag = false;
 
@@ -172,7 +181,6 @@ class WCUtil {
     /**
      * @description 查询代码行数，空行数，注释行数
      * @param filePath 文件路径
-     * @return int 注释行数
      */
     private Count countingComplex(String filePath){
 
@@ -242,6 +250,9 @@ class WCUtil {
         return count;
     }
 
+    /**
+     * @description 参数判断
+     */
     private String judgeFilePath(Parameter parameter) {
 
         if(parameter.getFilePath() == null){
@@ -255,8 +266,15 @@ class WCUtil {
 
         String fileName = paths[paths.length - 1];
 
+        boolean flag = false;
+
         //先判断文件名中是否含有通配符（因为文件夹名中不含?,*字符，所以若含有通配符则为文件类型）
-        if(fileName.contains("\\?") || fileName.contains("\\*")){
+        for(int i = 0 ; i < fileName.length() ; i ++){
+            if(fileName.toCharArray()[i] == '*' || fileName.toCharArray()[i] == '?'){
+                flag = true;
+            }
+        }
+        if(flag){
 
             //含有 ？, * 即为文件类型
             StringBuilder sb = new StringBuilder();
@@ -289,6 +307,11 @@ class WCUtil {
         return null;
     }
 
+    /**
+     * @description 文件名是否匹配
+     * @param fileName 实际文件名
+     * @param matchName 含通配符的文件名
+     */
     private boolean compareName(String fileName, String matchName){
 
         matchName = matchName.replaceAll("\\?","(.?)").replaceAll("\\*","(.*)");
